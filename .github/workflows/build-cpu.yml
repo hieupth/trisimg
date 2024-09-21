@@ -1,0 +1,20 @@
+name: Build CPU images
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - 'main'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      -
+        name: Clone triton server
+        run: |
+          git clone https://github.com/triton-inference-server/server.git
+          cd server
+          git checkout r24.08
+          python build.py -h
+          python build.py --backend onnx --backend openvino --backend python 
