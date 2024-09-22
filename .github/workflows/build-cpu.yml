@@ -1,4 +1,4 @@
-name: Build CPU images
+name: Build CPU base
 
 on:
   workflow_dispatch:
