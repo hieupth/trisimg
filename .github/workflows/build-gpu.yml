@@ -2,6 +2,11 @@ name: Build GPU base
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/build-gpu.yml"
 
 jobs:
   build:
@@ -20,7 +25,7 @@ jobs:
           dotnet: true
           haskell: true
           large-packages: true
-          docker-images: true
+          docker-images: false
           swap-storage: true
       -
         name: Set up QEMU
@@ -36,26 +41,14 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
       -
         name: Build and push
-        # GitHub Actions run without a TTY device. This is a workaround to get one,
-        # based on https://github.com/actions/runner/issues/241#issuecomment-842566950.
-        shell: 'script -q -e -c "bash --noprofile --norc -eo pipefail {0}"'
-        run: |
-          git clone https://github.com/triton-inference-server/server.git
-          cd server
-          git checkout r24.08
-          python build.py -h
-          python build.py \
-            --enable-gpu \
-            --backend onnxruntime \
-            --backend tensorrt \
-            --backend tensorrtllm \
-            --backend vllm \
-            --backend python \
-            --backend identity \
-            --backend repeat \
-            --backend ensemble \
-            --backend fil
-          docker tag tritonserver ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:gpu
-          docker push ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:gpu
+        uses: hieupth/docker-action@v1
+        with: 
+          shell: bash
+          image: nvcr.io/nvidia/tensorrt:24.08-py3
+          options: -v ./buildgpu.sh:/buildgpu.sh
+          run: bash /buildgpu.sh
