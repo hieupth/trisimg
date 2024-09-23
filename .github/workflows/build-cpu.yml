@@ -2,6 +2,11 @@ name: Build CPU base
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - ".github/workflows/build-cpu.yml"
 
 jobs:
   build:
@@ -47,6 +52,11 @@ jobs:
           git checkout r24.08
           python build.py -h
           python build.py \
+            --enable-logging \
+            --enable-stats \
+            --enable-tracing \
+            --endpoint=grpc \
+            --endpoint=http \
             --backend onnxruntime \
             --backend openvino \
             --backend python \
