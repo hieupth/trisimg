@@ -1,4 +1,4 @@
-name: Build CPU base
+name: Build CPU
 
 on:
   workflow_dispatch:
@@ -7,6 +7,7 @@ on:
       - "main"
     paths:
       - ".github/workflows/build-cpu.yml"
+      - "images/cpu/*"
 
 jobs:
   build:
@@ -41,29 +42,21 @@ jobs:
         with:
           username: ${{secrets.DOCKERHUB_USERNAME}}
           password: ${{secrets.DOCKERHUB_TOKEN}}
+      - 
+        name: Checkout
+        uses: actions/checkout@v4
       -
-        name: Build and push
+        name: Build base
         # GitHub Actions run without a TTY device. This is a workaround to get one,
         # based on https://github.com/actions/runner/issues/241#issuecomment-842566950.
         shell: 'script -q -e -c "bash --noprofile --norc -eo pipefail {0}"'
-        run: |
-          git clone https://github.com/triton-inference-server/server.git
-          cd server
-          git checkout r24.08
-          python build.py -h
-          python build.py \
-            --enable-logging \
-            --enable-stats \
-            --enable-tracing \
-            --endpoint=grpc \
-            --endpoint=http \
-            --backend onnxruntime \
-            --backend openvino \
-            --backend python \
-            --backend identity \
-            --backend repeat \
-            --backend ensemble
-          docker tag tritonserver ${{secrets.DOCKERHUB_USERNAME}}/tritonserver
-          docker tag tritonserver ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:cpu
-          docker push ${{secrets.DOCKERHUB_USERNAME}}/tritonserver
-          docker push ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:cpu
+        run: images/cpu/build.sh
+      -
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          push: true
+          context: images/cpu
+          file: images/cpu/dockerfile
+          platforms: linux/amd64
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tritonserver

@@ -1,0 +1,5 @@
+FROM tritonserver
+
+RUN pip install --no-cache-dir \
+      huggingface_hub transformers tokenizers \
+      numpy scikit-learn pyvi
