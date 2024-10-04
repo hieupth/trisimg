@@ -1,4 +1,5 @@
-FROM tritonserver
+ARG VERSION=24.08
+FROM hieupth/tritonserver:gpubase-${VERSION}
 
 RUN pip install --no-cache-dir \
       huggingface_hub transformers tokenizers \

@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -e;
+set -ex;
 
 git clone https://github.com/triton-inference-server/server.git
 cd server
-git checkout r24.08
+git checkout r${TRITON_VERSION}
 pip install distro requests
 python build.py \
   --enable-gpu \
@@ -22,5 +22,5 @@ python build.py \
   --backend repeat \
   --backend ensemble \
   --backend fil
-docker tag tritonserver ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:gpu
-docker push ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:gpu
+docker tag tritonserver ${DOCKERHUB_USERNAME}/tritonserver:gpubase-${TRITON_VERSION}
+docker push ${DOCKERHUB_USERNAME}/tritonserver:gpubase-${TRITON_VERSION}

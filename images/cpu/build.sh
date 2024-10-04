@@ -1,10 +1,10 @@
 #!/bin/bash
 
-set -e;
+set -ex;
 
 git clone https://github.com/triton-inference-server/server.git
 cd server
-git checkout r24.08
+git checkout r${TRITON_VERSION}
 pip install distro requests
 python build.py \
   --enable-logging \
@@ -18,3 +18,5 @@ python build.py \
   --backend identity \
   --backend repeat \
   --backend ensemble
+docker tag tritonserver ${DOCKERHUB_USERNAME}/tritonserver:cpubase-${TRITON_VERSION}
+docker push ${DOCKERHUB_USERNAME}/tritonserver:cpubase-${TRITON_VERSION}

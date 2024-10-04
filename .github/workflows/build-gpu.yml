@@ -2,32 +2,23 @@ name: Build GPU
 
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ['Buildbase GPU']
+    types: [completed]
   push:
     branches:
       - "main"
     paths:
       - ".github/workflows/build-gpu.yml"
-      - "images/gpu/*"
+      - "images/gpu/dockerfile"
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: [24.08]
     steps:
-      - 
-        name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@main
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: true
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: false
-          swap-storage: true
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -46,14 +37,6 @@ jobs:
         name: Checkout
         uses: actions/checkout@v4
       -
-        name: Build base
-        uses: hieupth/docker-action@v1
-        with: 
-          shell: bash
-          image: nvcr.io/nvidia/tensorrt:24.08-py3
-          options: -v ./images/gpu/build.sh:/build.sh
-          run: bash /build.sh
-      -
         name: Build and push
         uses: docker/build-push-action@v3
         with:
@@ -61,4 +44,6 @@ jobs:
           context: images/gpu
           file: images/gpu/dockerfile
           platforms: linux/amd64
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/tritonserver:gpu
+          tags: ${{secrets.DOCKERHUB_USERNAME}}/tritonserver:gpu-${{matrix.version}}
+          build-args: |
+            VERSION=${{matrix.version}}
