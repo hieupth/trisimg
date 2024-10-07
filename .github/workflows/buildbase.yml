@@ -1,4 +1,4 @@
-name: Buildbase GPU
+name: Buildbase
 
 on:
   workflow_dispatch:
@@ -6,8 +6,8 @@ on:
     branches:
       - "main"
     paths:
-      - ".github/workflows/buildbase-gpu.yml"
-      - "images/gpu/build.sh"
+      - ".github/workflows/buildbase.yml"
+      - "buildbase/*"
 
 jobs:
   build:
@@ -53,10 +53,15 @@ jobs:
         uses: hieupth/docker-action@v1
         with: 
           shell: bash
+          username: ${{secrets.DOCKERHUB_USERNAME}}
+          password: ${{secrets.DOCKERHUB_TOKEN}}
           image: nvcr.io/nvidia/tensorrt:${{matrix.version}}-py3
           options: |
-            -v ./images/gpu/build.sh:/build.sh
+            -v ./buildbase.sh:/build.sh
             -e TRITON_VERSION=${{matrix.version}}
-            -e DOCKER_USERNAME=${{secrets.DOCKERHUB_USERNAME}}
-            -e DOCKER_TOKEN=${{secrets.GITHUB_TOKEN}}
           run: bash /build.sh
+      -
+        name: Push image
+        run: |
+          docker tag tritonserver ${{secrets.DOCKERHUB_USERNAME}}/tritonserverbuild:${{matrix.version}}
+          docker push ${{secrets.DOCKERHUB_USERNAME}}/tritonserverbuild:${{matrix.version}}
