@@ -1,6 +1,5 @@
-ARG BASE=hieupth/tritonserver:24.08-base
-FROM ${BASE}
+ARG BASE=hieupth/tritonserverbuild:24.08
 
-RUN pip install --no-cache-dir \
-      huggingface_hub transformers tokenizers \
-      numpy scikit-learn pyvi
+FROM ${BASE}
+RUN pip install --no-cache-dir huggingface_hub transformers tokenizers numpy scikit-learn pyvi
+COPY ./hf.py hf.py 
