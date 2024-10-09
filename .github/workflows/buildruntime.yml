@@ -3,7 +3,7 @@ name: Build Runtime
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ['Buildbase']
+    workflows: [Buildbase]
     types: [completed]
   push:
     branches:
@@ -11,7 +11,7 @@ on:
     paths:
       - ".github/workflows/buildruntime.yml"
       - "dockerfile"
-      - "hf.py"
+      - "scripts/*"
 
 jobs:
   build:

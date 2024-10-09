@@ -1,0 +1,35 @@
+name: Update Description
+
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Buildbase", "Build Runtime"]
+    types:
+      - completed
+  push:
+    branches:
+      - "main"
+    paths:
+      - README.md
+
+jobs:
+  update-description:
+    runs-on: ubuntu-latest
+    if: ${{github.event.workflow_run.conclusion == 'success'}}
+    steps:
+    - 
+      name: Login to DockerHub
+      uses: docker/login-action@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - 
+      name: Checkout
+      uses: actions/checkout@v3
+    - 
+      name: Update docker description
+      uses: peter-evans/dockerhub-description@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+        repository: ${{ secrets.DOCKERHUB_USERNAME }}/tritonserver

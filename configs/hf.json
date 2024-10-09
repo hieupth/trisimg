@@ -2,7 +2,7 @@
   "token": "abc",
   "models": [
     {
-      "name": "hieupth/viencoder",
+      "name": "hieupth/triton.viencoder",
       "ref": "v1",
       "token": "abc"
     }
